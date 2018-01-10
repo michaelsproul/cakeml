@@ -21,6 +21,11 @@ val debugMsg_def = Define `
 val () = next_ml_names := ["debugMsg"];
 val result = translate debugMsg_def;
 
-val _ = ml_prog_update (close_module NONE);
+val sigs = listSyntax.mk_list(map sig_of_const [
+  ``fullGC``,
+  ``debugMsg``
+], ``:spec``);
+
+val _ = ml_prog_update (close_module (SOME sigs));
 
 val _ = export_theory();

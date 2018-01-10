@@ -3842,6 +3842,12 @@ fun concretise_main desired_tms = let
 fun concretise tms = concretise_main (SOME tms)
 fun concretise_all () = concretise_main NONE
 
+fun sig_of_const tm = let
+  val cake_ty = type2t (type_of tm)
+  val cake_name = rand (rand (rand (rator (concl (hol2deep tm)))))
+  in mk_Sval (cake_name, cake_ty)
+end
+
 (*
 val _ = show_assums := true
 

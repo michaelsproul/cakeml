@@ -43,5 +43,19 @@ val res = translate IS_NONE_DEF;
 val () = next_ml_names := ["map2"];
 val res = translate OPTION_MAP2_DEF;
 
-val _ = ml_prog_update (close_module NONE);
+(* NB: need to use HOL names for terms *)
+val sigs = listSyntax.mk_list(map sig_of_const [
+  ``getOpt``,
+  ``IS_SOME``,
+  ``THE``,
+  ``OPTION_JOIN``,
+  ``OPTION_MAP``,
+  (* FIXME: OPTION_BIND ?? *)
+  ``compose``,
+  ``composePartial``,
+  ``IS_NONE``,
+  ``OPTION_MAP2``
+], ``:spec``);
+
+val _ = ml_prog_update (close_module (SOME sigs));
 val _ = export_theory();

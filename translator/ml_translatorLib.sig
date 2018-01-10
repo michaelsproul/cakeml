@@ -126,4 +126,9 @@ sig
     val prove_EvalPatRel_fail : term ref
     val get_term :string -> term
 
+    val type2t : hol_type -> term
+
+    (* Compute the CakeML signature for a HOL const, returns `:spec` *)
+    val sig_of_const : term -> term
+
 end

@@ -60,6 +60,8 @@ structure astSyntax = struct
   val (Tannot_tm,mk_Tannot,dest_Tannot,is_Tannot) = s "Tannot"
   val (Lannot_tm,mk_Lannot,dest_Lannot,is_Lannot) = s "Lannot"
   val (Ptannot_tm,mk_Ptannot,dest_Ptannot,is_Ptannot) = s "Ptannot"
+  val (Sval_tm,mk_Sval,dest_Sval,is_Sval) = s "Sval"
+  (* TODO: functions for other spec variants *)
   end
   local val s = HolKernel.syntax_fns3 "ast" in
   val (Dexn_tm,mk_Dexn,dest_Dexn,is_Dexn) = s "Dexn"
