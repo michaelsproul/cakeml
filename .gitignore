@@ -65,3 +65,6 @@ compiler/benchmarks/sml/polyc_*
 compiler/benchmarks/sml/sml_*
 compiler/benchmarks/*.dat
 compiler/benchmarks/*.eps
+
+# OpenTheory articles
+*.art

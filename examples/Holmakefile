@@ -28,3 +28,9 @@ DEPS = $(patsubst %,%.uo,$(BARE_THYS1)) $(patsubst %,%.uo,$(BARE_THYS3)) $(PAREN
 $(HOLHEAP): $(DEPS)
 	$(protect $(HOLDIR)/bin/buildheap) -b $(PARENT_HOLHEAP) -o $(HOLHEAP) $(BARE_THYS1) $(BARE_THYS3)
 endif
+
+# Build OpenTheory articles
+ifeq($(KERNELID),otknl)
+ARTFILES = $(patsubst %Theory.uo,%.ot.art,$(THYFILES))
+all: $(ARTFILES)
+endif

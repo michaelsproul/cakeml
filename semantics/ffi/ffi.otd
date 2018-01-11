@@ -1,0 +1,7 @@
+skipthm datatype_behaviour
+skipthm datatype_ffi_outcome
+skipthm datatype_ffi_state
+skipthm datatype_final_event
+skipthm datatype_io_event
+skipthm datatype_oracle_result
+skipthm datatype_outcome

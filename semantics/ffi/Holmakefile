@@ -19,3 +19,10 @@ $(GENS): $(LEMS)
 	if type lem;\
 	then lem $(LEM_OPT) -suppress_renaming -auxiliary_level none -i ../../misc/lem_lib_stub/lib.lem -hol $(LEMS);\
 	else touch $(GENS); fi
+
+# Build OpenTheory articles
+ifeq($(KERNELID),otknl)
+ARTFILES = $(patsubst %Theory.uo,%.ot.art,$(THYFILES))
+
+all: $(ARTFILES)
+endif
