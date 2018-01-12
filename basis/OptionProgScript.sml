@@ -50,6 +50,7 @@ val sigs = listSyntax.mk_list(map sig_of_const [
   ``THE``,
   ``OPTION_JOIN``,
   ``OPTION_MAP``,
+  ``OPTION_BIND``,
   (* FIXME: OPTION_BIND ?? *)
   ``compose``,
   ``composePartial``,
@@ -57,5 +58,5 @@ val sigs = listSyntax.mk_list(map sig_of_const [
   ``OPTION_MAP2``
 ], ``:spec``);
 
-val _ = ml_prog_update (close_module (SOME sigs));
+val _ = ml_prog_update (close_module NONE);
 val _ = export_theory();

@@ -3583,6 +3583,27 @@ val (th,(fname,ml_fname,def,_,pre)) = hd (zip results thms)
 fun translate def =
   let
     val (is_rec,is_fun,results) = translate_main translate register_type def
+
+    (* Compute the signature of the CakeML value, and store it *)
+    fun get_term th = th |> concl |> list_dest dest_conj |> hd |> list_dest dest_forall |> last
+                         |> dest_eq |> fst |> strip_comb |> fst;
+
+    fun signature_of cake_name tm = mk_Sval (stringSyntax.fromMLstring cake_name, type2t (type_of tm));
+
+    val signatures = map (fn (_, ml_fname, def, _, _) => signature_of ml_fname (get_term def))
+                         results;
+
+    fun mk_sig_thm sign = let
+      val sig_const_nm = (dest_Sval sign |> #1 |> fromHOLstring) ^ "_sig_def";
+      val () = new_constant (sig_const_nm, ``:spec``);
+      val sig_const_tm = mk_const (sig_const_nm, ``:spec``);
+      val def = new_definition (sig_const_nm, mk_eq (sig_const_tm, sign));
+      in def
+    end
+
+    val _ = map mk_sig_thm signatures;
+
+    (* val signatures = listSyntax.mk_list(signatures, ``:spec``); *)
   in
     if is_rec then
     let
