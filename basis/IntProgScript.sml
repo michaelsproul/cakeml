@@ -2,11 +2,13 @@ open preamble
      ml_translatorLib ml_progLib mlintTheory
      mlbasicsProgTheory basisFunctionsLib gcdTheory
 
-val _ = new_theory"IntProg"
+val _ = new_theory"IntProg";
 
 val _ = translation_extends "mlbasicsProg";
 
 val _ = ml_prog_update (open_module "Int");
+
+val () = generate_sigs := true;
 
 val _ = ml_prog_update (add_dec ``Dtabbrev unknown_loc [] "int" (Tapp [] TC_int)`` I);
 val _ = trans "+" `(+):int->int->int`
@@ -125,6 +127,25 @@ val gcd_side = prove(
   \\ fs [ADD1] \\ rw [] \\ fs [])
   |> update_precondition;
 
-val _ = ml_prog_update (close_module NONE);
+val sigs = module_signatures [
+  "+",
+  "-",
+  "*",
+  "div",
+  "mod",
+  "<",
+  ">",
+  "<=",
+  ">=",
+  "~",
+  (* FIXME(sproul): do we want to expose zero_pad? *)
+  "zero_pad",
+  (*"toChar",*)
+  "toString",
+  "fromString",
+  "gcd"
+];
+
+val _ = ml_prog_update (close_module (SOME sigs));
 
 val _ = export_theory();

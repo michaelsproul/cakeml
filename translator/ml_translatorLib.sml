@@ -2715,12 +2715,12 @@ fun dest_word_shift tm =
 (* CakeML signature generation and manipulation *)
 val generate_sigs = ref false;
 
-fun sig_of_mlname name = definition (name ^ "_sig") |> concl |> rhs;
+fun sig_of_mlname name = definition (ml_progLib.pick_name name ^ "_sig") |> concl |> rhs;
 
 fun module_signatures names = listSyntax.mk_list(map sig_of_mlname names, ``:spec``);
 
 fun sig_of_const cake_name tm =
-  mk_Sval (stringSyntax.fromMLstring cake_name, type2t (type_of tm));
+  mk_Sval (stringSyntax.fromMLstring (ml_progLib.pick_name cake_name), type2t (type_of tm));
 
 fun generate_sig_thms results = let
   fun const_from_def th = th |> concl |> list_dest dest_conj |> hd

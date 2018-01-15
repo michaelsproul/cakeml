@@ -7,6 +7,8 @@ val _ = translation_extends "OptionProg"
 
 val _ = ml_prog_update (open_module "List");
 
+val () = generate_sigs := true;
+
 val _ = ml_prog_update (add_dec ``Dtabbrev unknown_loc ["'a"] "list" (Tapp [Tvar "'a"] (TC_name (Short "list")))`` I);
 
 val result = translate LENGTH;
@@ -137,6 +139,49 @@ val nth_side_def = Q.prove(
 
 val _ = next_ml_names := ["update"];
 val result = translate LUPDATE_def;
+
+val sigs = module_signatures [
+  "length",
+  "null",
+  "revAppend",
+  "rev",
+  "append",
+  "hd",
+  "tl",
+  "last",
+  "getItem",
+  "nth",
+  "take",
+  "drop",
+  "concat",
+  "map",
+  "mapPartial",
+  (* FIXME(sproul): what about app? *)
+  "find",
+  "filter",
+  "partition",
+  "foldl",
+  "foldr",
+  "exists",
+  "all",
+  "snoc",
+  (* FIXME: genlist? *)
+  "genlist",
+  "tabulate",
+  "collate",
+  "zip",
+  "member",
+  "sum",
+  "unzip",
+  "pad_right",
+  "pad_left",
+  "all_distinct",
+  "isPrefix",
+  "front",
+  (* FIXME: should be called splitAtPki? *)
+  "splitatpki",
+  "update"
+];
 
 val _ =  ml_prog_update (close_module NONE);
 
