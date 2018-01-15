@@ -2712,6 +2712,36 @@ fun dest_word_shift tm =
   if wordsSyntax.is_word_ror tm then Eval_word_ror else
     failwith("not a word shift")
 
+(* CakeML signature generation and manipulation *)
+val generate_sigs = ref false;
+
+fun sig_of_mlname name = definition (name ^ "_sig") |> concl |> rhs;
+
+fun module_signatures names = listSyntax.mk_list(map sig_of_mlname names, ``:spec``);
+
+fun sig_of_const cake_name tm =
+  mk_Sval (stringSyntax.fromMLstring cake_name, type2t (type_of tm));
+
+fun generate_sig_thms results = let
+  fun const_from_def th = th |> concl |> list_dest dest_conj |> hd
+                             |> list_dest dest_forall |> last
+                             |> dest_eq |> fst |> strip_comb |> fst;
+
+  fun mk_sig_thm sval = let
+    val cake_name = dest_Sval sval |> #1 |> fromHOLstring;
+    val sig_const_nm = cake_name ^ "_sig";
+    val sig_const_tm = mk_var(sig_const_nm, ``:spec``);
+
+    val def = new_definition(sig_const_nm, mk_eq(sig_const_tm, sval));
+    in def
+  end
+
+  val signatures = map (fn (_, ml_fname, def, _, _) => sig_of_const ml_fname (const_from_def def))
+                       results;
+
+  in map mk_sig_thm signatures
+end
+
 (*
 val tm = rhs
 val tm = rhs_tm
@@ -3584,26 +3614,10 @@ fun translate def =
   let
     val (is_rec,is_fun,results) = translate_main translate register_type def
 
-    (* Compute the signature of the CakeML value, and store it *)
-    fun get_term th = th |> concl |> list_dest dest_conj |> hd |> list_dest dest_forall |> last
-                         |> dest_eq |> fst |> strip_comb |> fst;
-
-    fun signature_of cake_name tm = mk_Sval (stringSyntax.fromMLstring cake_name, type2t (type_of tm));
-
-    val signatures = map (fn (_, ml_fname, def, _, _) => signature_of ml_fname (get_term def))
-                         results;
-
-    fun mk_sig_thm sign = let
-      val sig_const_nm = (dest_Sval sign |> #1 |> fromHOLstring) ^ "_sig_def";
-      val () = new_constant (sig_const_nm, ``:spec``);
-      val sig_const_tm = mk_const (sig_const_nm, ``:spec``);
-      val def = new_definition (sig_const_nm, mk_eq (sig_const_tm, sign));
-      in def
-    end
-
-    val _ = map mk_sig_thm signatures;
-
-    (* val signatures = listSyntax.mk_list(signatures, ``:spec``); *)
+    val () =
+      if !generate_sigs then
+        let val _ = generate_sig_thms results in () end
+      else ();
   in
     if is_rec then
     let
@@ -3862,12 +3876,6 @@ fun concretise_main desired_tms = let
 
 fun concretise tms = concretise_main (SOME tms)
 fun concretise_all () = concretise_main NONE
-
-fun sig_of_const tm = let
-  val cake_ty = type2t (type_of tm)
-  val cake_name = rand (rand (rand (rator (concl (hol2deep tm)))))
-  in mk_Sval (cake_name, cake_ty)
-end
 
 (*
 val _ = show_assums := true

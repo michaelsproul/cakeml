@@ -5,6 +5,8 @@ val _ = new_theory"OptionProg"
 
 val _ = translation_extends "RuntimeProg"
 
+val _ = generate_sigs := true;
+
 val _ = ml_prog_update (open_module "Option");
 
 val _ = ml_prog_update (add_dec ``Dtabbrev unknown_loc ["'a"] "option" (Tapp [Tvar "'a"] (TC_name (Short "option")))`` I);
@@ -43,20 +45,18 @@ val res = translate IS_NONE_DEF;
 val () = next_ml_names := ["map2"];
 val res = translate OPTION_MAP2_DEF;
 
-(* NB: need to use HOL names for terms *)
-val sigs = listSyntax.mk_list(map sig_of_const [
-  ``getOpt``,
-  ``IS_SOME``,
-  ``THE``,
-  ``OPTION_JOIN``,
-  ``OPTION_MAP``,
-  ``OPTION_BIND``,
-  (* FIXME: OPTION_BIND ?? *)
-  ``compose``,
-  ``composePartial``,
-  ``IS_NONE``,
-  ``OPTION_MAP2``
-], ``:spec``);
+val sigs = module_signatures [
+  "getOpt",
+  "isSome",
+  "valOf",
+  "join",
+  "map",
+  "mapPartial",
+  "compose",
+  "composePartial",
+  "isNone",
+  "map2"
+];
 
-val _ = ml_prog_update (close_module NONE);
+val _ = ml_prog_update (close_module (SOME sigs));
 val _ = export_theory();
