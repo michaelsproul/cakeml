@@ -359,6 +359,7 @@ fun pick_name str =
   if str = "+" then "plus" else
   if str = "-" then "minus" else
   if str = "*" then "times" else
+  if str = "/" then "div" else
   if str = "!" then "deref" else
   if str = ":=" then "assign" else
   if str = "^" then "strcat" else str (* name is fine *)
