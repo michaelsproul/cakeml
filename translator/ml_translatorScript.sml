@@ -2004,6 +2004,27 @@ val evaluate_match_rw = Q.store_thm("evaluate_match_rw",
   \\ Cases_on `pmatch env.c st.refs (Pcon xx pats) args []`
   \\ FULL_SIMP_TAC (srw_ss()) []);
 
+(* Functions to strip the long module names out of generated signatures *)
+val strip_mod_id_def = Define `
+  strip_mod_id (Short s) = Short s ∧
+  strip_mod_id (Long _ x) = strip_mod_id x`;
+
+val strip_mod_tctor_def = Define `
+  strip_mod_tctor (TC_name i) = (TC_name (strip_mod_id i)) ∧
+  strip_mod_tctor x = x`;
+
+val t1_size_append_thm = Q.store_thm("t1_size_append",
+  `∀(xs: t list) ys. t1_size (xs ++ ys) = t1_size xs + t1_size ys`,
+  Induct_on `xs` >> simp [t_size_def]
+);
+
+val strip_mod_t_def = tDefine "strip_mod_t"
+ `strip_mod_t (Tapp ts ctor) = (Tapp (MAP strip_mod_t ts) (strip_mod_tctor ctor)) ∧
+  strip_mod_t x = x`
+ (WF_REL_TAC `measure t_size` \\ rpt STRIP_TAC
+  \\ imp_res_tac (MEM_SPLIT_APPEND_first) \\ rw [t1_size_append_thm, t_size_def]);
+
+
 (* terms used by the Lib file *)
 
 val translator_terms = save_thm("translator_terms",
@@ -2013,6 +2034,7 @@ val translator_terms = save_thm("translator_terms",
      ("lookup_cons",``lookup_cons s e = SOME x``),
      ("nsLookup",``nsLookup e s = SOME (x:v)``), (*TODO: Should this be e or e.v?*)
      ("eq remove",``!b x. Eq b x = (b:'a->v->bool)``),
+     ("strip_mod_t", ``strip_mod_t``),
      ("map pat",``MAP (f:'a->'b)``),
      ("filter pat",``FILTER (f:'a->bool)``),
      ("every pat",``EVERY (f:'a->bool)``),

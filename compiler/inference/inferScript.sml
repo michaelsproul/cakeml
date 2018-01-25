@@ -723,7 +723,7 @@ val check_specs_def = Define `
 (check_specs mn tenvT idecls ienv (Sval x t::specs) =
   do fvs <- t_to_freevars t;
      fvs' <- return (nub fvs);
-     () <- guard (check_type_names tenvT t) NONE (implode "Bad type annotation");
+     () <- guard (check_type_names tenvT t) NONE (implode (CONCAT ["Bad type annotation for "; x]));
      check_specs mn tenvT idecls
        (ienv with inf_v := nsBind x (LENGTH fvs', infer_type_subst (ZIP (fvs', MAP Infer_Tvar_db (COUNT_LIST (LENGTH fvs'))))
                                                      (type_name_subst tenvT t))

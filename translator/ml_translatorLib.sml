@@ -2720,8 +2720,13 @@ fun sig_of_mlname name = definition (ml_progLib.pick_name name ^ "_sig") |> conc
 
 fun module_signatures names = listSyntax.mk_list(map sig_of_mlname names, spec_ty);
 
-fun sig_of_const cake_name tm =
-  mk_Sval (stringSyntax.fromMLstring (ml_progLib.pick_name cake_name), type2t (type_of tm));
+val strip_mod_t_hol = get_term "strip_mod_t";
+fun strip_mod_t t = mk_comb (strip_mod_t_hol, t) |> EVAL |> concl |> rhs;
+
+fun sig_of_const cake_name tm = let
+  val cake_ty = strip_mod_t (type2t (type_of tm));
+  in mk_Sval (stringSyntax.fromMLstring (ml_progLib.pick_name cake_name), cake_ty)
+end
 
 fun generate_sig_thms results = let
   fun const_from_def th = th |> concl |> strip_conj |> hd |> strip_forall |> #2
