@@ -394,7 +394,8 @@ in
     if ty = mlstring_ty then Tapp [] astSyntax.TC_string else
     if can dest_vartype ty then
       astSyntax.mk_Tvar(stringSyntax.fromMLstring ((* string_tl *) (dest_vartype ty)))
-    else let
+    else
+let
       val (lhs,rhs) = find_type_mapping ty
       val i = match_type lhs ty
       val xs = free_typevars rhs
@@ -406,13 +407,15 @@ in
       val (x,tt) = dest_type ty
       val name = if x = "fun" then "fun" else
                  if x = "prod" then "prod" else
+                 if x = "vector" then "vector" else
                    full_name_of_type ty
       val tt = map type2t tt
       val name_tm = stringSyntax.fromMLstring name
-      in if name = "fun"  then Tapp tt astSyntax.TC_fn else
-         if name = "prod" then Tapp tt astSyntax.TC_tup else
-         if name = "list" then Tapp tt (astSyntax.mk_TC_name(astSyntax.mk_Short(name_tm))) else
-                               Tapp tt (astSyntax.mk_TC_name(full_id name_tm)) end
+      in if name = "fun"    then Tapp tt astSyntax.TC_fn else
+         if name = "prod"   then Tapp tt astSyntax.TC_tup else
+         if name = "vector" then Tapp tt astSyntax.TC_vector else
+         if name = "list"   then Tapp tt (astSyntax.mk_TC_name(astSyntax.mk_Short(name_tm))) else
+                                 Tapp tt (astSyntax.mk_TC_name(full_id name_tm)) end
   fun inst_type_inv (ty,inv) ty0 = let
     val i = match_type ty ty0
     val ii = map (fn {redex = x, residue = y} => (x,y)) i

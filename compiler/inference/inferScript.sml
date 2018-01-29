@@ -793,8 +793,8 @@ val check_signature_def = Define `
   return (decls1, ienv)) ∧
 (check_signature mn tenvT init_decls decls1 ienv (SOME specs) =
   do (decls', ienv') <- check_specs mn tenvT empty_inf_decls <|inf_v := nsEmpty; inf_c := nsEmpty; inf_t := nsEmpty |> specs;
-     () <- guard (check_weak_ienv ienv ienv') NONE (implode "Signature mismatch");
-     () <- guard (check_weak_decls decls1 decls') NONE (implode "Signature mismatch");
+     () <- guard (check_weak_ienv ienv ienv') NONE (implode "Signature mismatch ienv");
+     () <- guard (check_weak_decls decls1 decls') NONE (implode "Signature mismatch decls");
      return (decls',ienv')
   od)`;
 
