@@ -39,6 +39,11 @@ val ffi_get_arg_def = Define `
          else NONE)
       else NONE`;
 
+(* FIXME(sproul): not sure if this definition makes any sense (given that exit never returns) *)
+val ffi_exit_with_code_def = Define `
+  ffi_exit_with_code (conf: word8 list) (bytes: word8 list) args = NONE
+`;
+
 (* lengths *)
 
 val ffi_get_arg_count_length = store_thm("ffi_get_arg_count_length",
@@ -74,6 +79,7 @@ val cl_ffi_part_def = Define`
   cl_ffi_part = (encode,decode,
     [("get_arg_count",ffi_get_arg_count);
      ("get_arg_length",ffi_get_arg_length);
-     ("get_arg",ffi_get_arg)])`;
+     ("get_arg",ffi_get_arg);
+     ("exit_with_code", ffi_exit_with_code)])`;
 
 val _ = export_theory();

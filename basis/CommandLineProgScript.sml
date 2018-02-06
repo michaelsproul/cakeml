@@ -48,6 +48,12 @@ val _ = (append_prog o process_topdecs) `fun name u = List.hd (cline ())`
 
 val _ = (append_prog o process_topdecs) `fun arguments u = List.tl (cline ())`
 
+val _ = (append_prog o process_topdecs) `
+  fun exit_with_code x =
+    let
+      val args = Word8Array.array 1 (Word8.fromInt x)
+    in #(exit_with_code) "" args end`;
+
 val _ = ml_prog_update (close_module NONE);
 
 val _ = export_theory();

@@ -265,4 +265,25 @@ val COMMANDLINE_HPROP_INJ = Q.store_thm("COMMANDLINE_HPROP_INJ[hprop_inj]",
   `!cl1 cl2. HPROP_INJ (COMMANDLINE cl1) (COMMANDLINE cl2) (cl2 = cl1)`,
   prove_hprop_inj_tac UNIQUE_COMMANDLINE);
 
+(*
+val CommandLine_exit_spec = Q.store_thm("CommandLine_exit_spec",
+  `NUM ec exit_code ==>
+    app (p:'ffi ffi_proj) ^(fetch_v "CommandLine.exit_with_code" st) [exit_code]
+    (emp)
+    (POSTe ex. emp)`,
+  xcf "CommandLine.exit_with_code" st
+  \\ xlet_auto
+  >- xsimpl
+  \\ xlet_auto
+  \\ xffi
+    \\ fs[IO_def, cfHeapsBaseTheory.IOx_def,cl_ffi_part_def,COMMANDLINE_def]
+    \\ xsimpl
+    \\ qmatch_goalsub_abbrev_tac`IO s u ns`
+  \\ map_every qexists_tac [`emp`, `s`, `s`, `u`, `ns`]
+  \\
+  \\ xsimpl
+  \\ fs [cfHeapsBaseTheory.IO_def, cl_ffi_part_def]
+  \\ metis_tac []
+  >- (xcon \\ xsimpl)
+*)
 val _ = export_theory();

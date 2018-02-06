@@ -33,6 +33,10 @@ void ffiget_arg (unsigned char *c, long clen, unsigned char *a, long alen) {
   }
 }
 
+void ffiexit_with_code(unsigned char *c, long clen, unsigned char *a, long alen) {
+  exit(a[0]);
+}
+
 /* fsFFI (file system and I/O) */
 
 /* 0 indicates null fd */

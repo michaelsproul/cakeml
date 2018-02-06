@@ -31,6 +31,8 @@ val basis_ffi_oracle_def = Define `
        case ffi_get_arg conf bytes cls of
        | SOME (bytes,cls) => Oracle_return (cls,fs) bytes
        | _ => Oracle_fail else
+     if name = "exit_with_code" then
+       Oracle_diverge else
      if name = "open_in" then
        case ffi_open_in conf bytes fs of
        | SOME (bytes,fs) => Oracle_return (cls,fs) bytes
