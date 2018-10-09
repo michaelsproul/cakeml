@@ -227,7 +227,11 @@ val main = process_topdecs`
         print compiler_current_build_info_str
       else
         case compiler_compile_64 cl (String.explode (TextIO.inputAll TextIO.stdIn))  of
-          (c, e) => (print_app_list c; TextIO.output TextIO.stdErr e)
+          (c, e) => (
+            print_app_list c;
+            TextIO.output TextIO.stdErr e;
+            if e <> "" then Runtime.abort () else ()
+          )
     end`;
 
 val res = append_prog main;
