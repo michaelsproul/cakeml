@@ -240,11 +240,21 @@ val st = get_ml_prog_state()
 
 val main_spec = Q.store_thm("main_spec",
   `app (p:'ffi ffi_proj) ^(fetch_v "main" st)
-     [Conv NONE []] (STDIO fs * COMMANDLINE cl)
-     (POSTv uv.
-       &UNIT_TYPE () uv
-       * STDIO (full_compile_64 (TL cl) (get_stdin fs) fs)
-       * COMMANDLINE cl)`,
+    [Conv NONE []] (STDIO fs * COMMANDLINE cl * RUNTIME)
+    (POST
+      (\uv.
+        &UNIT_TYPE () uv
+        * &(SND (compile_64 (TL cl) (get_stdin fs)) = strlit "" \/ has_version_flag (TL cl))
+        * STDIO (full_compile_64 (TL cl) (get_stdin fs) fs)
+        * COMMANDLINE cl
+        * RUNTIME)
+      (\e. &F)
+      (\n c b.
+        &(n = "exit" /\ c = [] /\ b = [1w])
+        * &(SND (compile_64 (TL cl) (get_stdin fs)) <> strlit "" /\ ¬ has_version_flag (TL cl))
+        * STDIO (full_compile_64 (TL cl) (get_stdin fs) fs)
+        * COMMANDLINE cl
+        * RUNTIME))`,
   xcf "main" st
   \\ xlet_auto >- (xcon \\ xsimpl)
   \\ xlet_auto
@@ -292,12 +302,21 @@ val main_spec = Q.store_thm("main_spec",
   \\ fs[ml_translatorTheory.PAIR_TYPE_def]
   \\ xmatch
   \\ xlet_auto >- xsimpl
-  \\ xapp_spec output_stderr_spec
-  \\ xsimpl
-  \\ qmatch_goalsub_abbrev_tac`STDIO fs'`
-  \\ CONV_TAC(RESORT_EXISTS_CONV List.rev)
-  \\ qexists_tac`fs'` \\ xsimpl
-  \\ instantiate
+  \\ qmatch_goalsub_abbrev_tac `STDIO fs'`
+  \\ xlet `POSTv uv. &(UNIT_TYPE () uv) * STDIO (add_stderr fs' err) * COMMANDLINE cl * RUNTIME`
+  >- (xapp_spec output_stderr_spec
+      \\ xsimpl
+      \\ asm_exists_tac
+      \\ xsimpl
+      \\ CONV_TAC SWAP_EXISTS_CONV
+      \\ qexists_tac `fs'`
+      \\ xsimpl )
+  \\ xlet_auto >- xsimpl
+  \\ xif
+  >- (xlet_auto >- (xcon \\ xsimpl)
+      \\ xapp
+      \\ xsimpl )
+  \\ xcon
   \\ xsimpl);
 
 val main_whole_prog_spec = Q.store_thm("main_whole_prog_spec",
