@@ -319,8 +319,84 @@ val main_spec = Q.store_thm("main_spec",
   \\ xcon
   \\ xsimpl);
 
+val main_spec_success = Q.store_thm("main_spec_success",
+  `SND (compile_64 (TL cl) (get_stdin fs)) = strlit "" \/ has_version_flag (TL cl) ==>
+   app (p:'ffi ffi_proj) ^(fetch_v "main" st)
+    [Conv NONE []] (STDIO fs * COMMANDLINE cl)
+    (POSTv uv.
+        &UNIT_TYPE () uv
+        * STDIO (full_compile_64 (TL cl) (get_stdin fs) fs)
+        * COMMANDLINE cl)`,
+  xcf "main" st
+  \\ xlet_auto >- (xcon \\ xsimpl)
+  \\ xlet_auto >- xsimpl
+  \\ reverse(Cases_on`STD_streams fs`) >- (fs[STDIO_def] \\ xpull)
+  (* TODO: it would be nice if this followed more directly.
+           either (or both):
+             - make STD_streams assert "stdin" is in the files
+             - make wfFS separate from wfFS, so STDIO fs will imply wfFS fs *)
+  \\ reverse(Cases_on`∃inp pos. stdin fs inp pos`)
+  >- (
+    fs[STDIO_def,IOFS_def] \\ xpull \\ fs[stdin_def]
+    \\ `F` suffices_by fs[]
+    \\ fs[wfFS_def,STD_streams_def,MEM_MAP,Once EXISTS_PROD,PULL_EXISTS]
+    \\ fs[EXISTS_PROD]
+    \\ metis_tac[ALOOKUP_FAILS,ALOOKUP_MEM,NOT_SOME_NONE,SOME_11,PAIR_EQ,option_CASES] )
+  \\ fs[get_stdin_def]
+  \\ SELECT_ELIM_TAC
+  \\ simp[FORALL_PROD,EXISTS_PROD]
+  \\ conj_tac >- metis_tac[] \\ rw[]
+  \\ imp_res_tac stdin_11 \\ rw[]
+  \\ imp_res_tac stdin_get_file_content
+  \\ xlet_auto >- xsimpl
+  \\ xif
+  >- (
+    simp[full_compile_64_def]
+    \\ xapp
+    \\ CONV_TAC SWAP_EXISTS_CONV
+    \\ qexists_tac `current_build_info_str`
+    \\ fs [compilerTheory.current_build_info_str_def,
+           fetch "-" "compiler_current_build_info_str_v_thm"]
+    \\ xsimpl
+    \\ rename1 `add_stdout _ (strlit string)`
+    \\ CONV_TAC SWAP_EXISTS_CONV
+    \\ qexists_tac`fs`
+    \\ xsimpl)
+  \\ xlet_auto >- (xsimpl \\ fs[FD_stdin])
+  \\ xlet_auto >- xsimpl
+  \\ xlet_auto >- xsimpl
+  \\ fs [full_compile_64_def]
+  \\ pairarg_tac
+  \\ fs[ml_translatorTheory.PAIR_TYPE_def]
+  \\ xmatch
+  \\ xlet_auto >- xsimpl
+  \\ qmatch_goalsub_abbrev_tac `STDIO fs'`
+  \\ xlet `POSTv uv. &(UNIT_TYPE () uv) * STDIO (add_stderr fs' err) * COMMANDLINE cl`
+  >- (xapp_spec output_stderr_spec
+      \\ xsimpl
+      \\ asm_exists_tac
+      \\ xsimpl
+      \\ CONV_TAC SWAP_EXISTS_CONV
+      \\ qexists_tac `fs'`
+      \\ xsimpl )
+  \\ xlet_auto >- xsimpl
+  \\ xif
+  \\ fs[compile_64_def]
+  \\ SELECT_ELIM_TAC
+  \\ `(@(inp,pos). stdin fs inp pos) = (inp, p_2)` by SELECT_ELIM_TAC
+  \\ `SND (compile_64 (TL cl) ((λ(inp,pos). DROP pos inp) (@(inp,pos). stdin fs inp pos))) = err` by fs[]
+  >- (xlet_auto >- (xcon \\ xsimpl)
+      \\ xapp
+      \\ xsimpl
+      \\ fs[] )
+  \\ xcon
+  \\ xsimpl)
+);
+
 val main_whole_prog_spec = Q.store_thm("main_whole_prog_spec",
-  `whole_prog_spec ^(fetch_v "main" st) cl fs NONE
+  `whole_prog_spec ^(fetch_v "main" st) cl fs
+    (SOME (RUNTIME * &(SND (compile_64 (TL cl) (get_stdin fs)) = strlit "" ∨
+                       has_version_flag (TL cl))))
     ((=) (full_compile_64 (TL cl) (get_stdin fs) fs))`,
   simp[whole_prog_spec_def,UNCURRY]
   \\ qmatch_goalsub_abbrev_tac`fs1 = _ with numchars := _`
@@ -330,8 +406,9 @@ val main_whole_prog_spec = Q.store_thm("main_whole_prog_spec",
        GSYM fastForwardFD_with_numchars,
        GSYM add_stdo_with_numchars, with_same_numchars]
   \\ simp [SEP_CLAUSES]
-  \\ match_mp_tac(MP_CANON(MATCH_MP app_wgframe main_spec))
-  \\ xsimpl);
+  \\ xpull
+  \\ (match_mp_tac(MP_CANON(MATCH_MP app_wgframe main_spec))
+      \\ xsimpl ));
 
 val (semantics_thm,prog_tm) = whole_prog_thm st "main" main_whole_prog_spec;
 
